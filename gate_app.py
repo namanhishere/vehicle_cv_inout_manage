@@ -180,6 +180,14 @@ class GateApp:
                         self._restart_feed(side)
                     except Exception:
                         log.exception("camera %s restart failed", side)
+                elif feed.ok and time.monotonic() - feed.last_frame_at > 15.0:
+                    # stream reports ok but frames stopped flowing: reopen
+                    log.warning("camera %s stalled (no frames > 15 s); "
+                                "restarting", side)
+                    try:
+                        self._restart_feed(side)
+                    except Exception:
+                        log.exception("camera %s restart failed", side)
             if not self.db.ping():
                 log.error("database ping failed")
             # image retention housekeeping (bounded disk usage)
