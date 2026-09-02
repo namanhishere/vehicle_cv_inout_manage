@@ -1,0 +1,46 @@
+# E2E fixture config: fresh tmp DB seeded per test, web on 8081.
+[cameras.in]
+source = "/dev/video99"
+width = 640
+height = 360
+fps = 10
+
+[cameras.out]
+source = "/dev/video99"
+width = 640
+height = 360
+fps = 10
+
+[vision]
+burst_frames = 5
+min_frames_detected = 2
+min_confidence = 0.75
+model_dir = "/home/ubuntu/doxe_quangtrung/models"
+
+[decision]
+cooldown_s = 10.0
+
+[leds]
+in_green = 17
+in_red = 27
+out_green = 22
+out_red = 23
+allow_s = 2.0
+reject_s = 2.0
+blink_s = 0.2
+
+[storage]
+db_path = "/tmp/gate-e2e/gate.db"
+images_dir = "/tmp/gate-e2e/images"
+retention_days = 7
+
+[web]
+host = "127.0.0.1"
+port = 8081
+secret_file = "/tmp/gate-e2e/secret"
+password_file = "/tmp/gate-e2e/admin.hash"
+
+[display]
+enabled = false
+width = 640
+height = 480
