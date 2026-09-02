@@ -1,0 +1,23 @@
+[Unit]
+Description=VN Plate Gate
+After=network.target
+
+[Service]
+User=gate
+Group=gate
+SupplementaryGroups=video,gpio
+ExecStart=/opt/gate/venv/bin/python /opt/gate/gate_app.py --config /etc/gate/config.toml
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/gate
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+MemoryMax=350M
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+winter2897 Vietnamese license plate dataset
+
+Source: https://drive.google.com/file/d/1KLK-DWgT3VoQH4fcTxAt2eB3sm7DGWAf
+(shared for training purposes by the dataset author; project:
+https://github.com/winter2897/Real-time-Auto-License-Plate-Recognition-with-Jetson-Nano)
+
+The upstream repository carries NO license file. This dataset is used for
+TRAINING ONLY and is NOT redistributed: no dataset images or labels are
+committed to this repository, and nothing derived from the dataset is
+shipped except the detector weights trained on it (see LICENSES.md and
+models/README.md - the detector was trained from scratch, so no
+weight-derivative license applies).
+
+The dataset contains images of cars and motorcycles with Vietnamese
+plates; only the training-time annotation signal (bounding boxes of
+plates) contributes to the shipped model.

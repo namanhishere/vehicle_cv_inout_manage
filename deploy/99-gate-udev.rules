@@ -1,0 +1,3 @@
+# Gate udev rules: gpio and video groups for the gate user.
+SUBSYSTEM=="gpio", KERNEL=="gpiochip*", GROUP="gpio"
+SUBSYSTEM=="video4linux", GROUP="video"
