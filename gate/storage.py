@@ -59,3 +59,17 @@ def prune(images_dir: str, retention_days: int) -> None:
                 d = _is_date_dir(os.path.join(year, month, day))
                 if d is not None and d < cutoff:
                     shutil.rmtree(dpath, ignore_errors=True)
+
+
+class Storage:
+    """Images-dir-bound facade the controller uses to persist event crops."""
+
+    def __init__(self, images_dir: str):
+        self.images_dir = images_dir
+
+    def save_crop(self, event_id: int, jpeg_bytes: bytes) -> str:
+        """Write one event crop; returns the relative path for the event row."""
+        return save_crop(self.images_dir, event_id, jpeg_bytes)
+
+    def prune(self, retention_days: int) -> None:
+        prune(self.images_dir, retention_days)
