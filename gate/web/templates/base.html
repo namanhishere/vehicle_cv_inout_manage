@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}VN Plate Gate{% endblock %}</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { font-family: system-ui, sans-serif; margin: 0; background: #101418; color: #e6e6e6; }
+    nav { display: flex; gap: 1.2rem; padding: .7rem 1.2rem; background: #1a2026; border-bottom: 1px solid #2c353d; }
+    nav a { color: #9fd8ff; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    main { padding: 1.2rem; max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 1.25rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: .8rem; }
+    th, td { border: 1px solid #2c353d; padding: .35rem .6rem; text-align: left; font-size: .95rem; }
+    th { background: #1a2026; }
+    .ok { color: #59d98a; } .bad { color: #ff6b6b; }
+    .badge-in { color: #59d98a; } .badge-out { color: #9fd8ff; }
+    .btn { background: #24405a; color: #fff; border: 0; border-radius: 4px; padding: .25rem .6rem; cursor: pointer; }
+    .btn:hover { background: #2f5a7d; }
+    input[type=text], input[type=password] { background: #141a20; color: #eee; border: 1px solid #3a4550; border-radius: 4px; padding: .35rem; }
+    .flash { padding: .5rem .8rem; border-radius: 4px; margin: .6rem 0; }
+    .flash-error { background: #4a1f22; border: 1px solid #8a3a3f; }
+    .flash-ok { background: #1c3a26; border: 1px solid #2f6b40; }
+    .status-grid { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+    .card { border: 1px solid #2c353d; border-radius: 8px; padding: .8rem 1.1rem; background: #151b21; min-width: 160px; }
+    .big { font-size: 2.2rem; font-weight: 700; }
+    .muted { color: #8b98a3; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="{{ url_for('dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('vehicles') }}">Vehicles</a>
+  <a href="{{ url_for('events') }}">Events</a>
+  <a href="{{ url_for('logout') }}" style="margin-left:auto">Log out</a>
+</nav>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

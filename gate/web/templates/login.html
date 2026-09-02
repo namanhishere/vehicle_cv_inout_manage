@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Login - VN Plate Gate{% endblock %}
+{% block content %}
+<h1>Gate admin login</h1>
+{% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+<form method="post" action="{{ url_for('login') }}" style="max-width: 22rem">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <p><input type="password" name="password" placeholder="Admin password" autofocus style="width:100%"></p>
+  <p><button class="btn" type="submit">Log in</button></p>
+</form>
+{% endblock %}

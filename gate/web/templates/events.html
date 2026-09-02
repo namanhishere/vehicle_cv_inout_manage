@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Events - VN Plate Gate{% endblock %}
+{% block content %}
+<h1>Events ({{ total }})</h1>
+<table>
+  <tr><th>Time</th><th>Plate</th><th>Direction</th><th>Result</th>
+      <th>Reason</th><th>Confidence</th></tr>
+  {% for row in rows %}
+  <tr>
+    <td>{{ row["ts"] }}</td>
+    <td>{{ row["plate"] or "—" }}</td>
+    <td class="{{ 'badge-in' if row['direction'] == 'IN' else 'badge-out' }}">
+      {{ row["direction"] }}</td>
+    <td class="{{ 'ok' if row['result'] == 'ALLOW' else 'bad' }}">{{ row["result"] }}</td>
+    <td>{{ row["reason"] }}</td>
+    <td>{{ "%.2f"|format(row["confidence"]) if row["confidence"] is not none else "—" }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<p>
+  {% if page > 1 %}<a href="{{ url_for('events', page=page-1) }}">← newer</a>{% endif %}
+  page {{ page }} / {{ pages }}
+  {% if page < pages %}<a href="{{ url_for('events', page=page+1) }}">older →</a>{% endif %}
+</p>
+{% endblock %}

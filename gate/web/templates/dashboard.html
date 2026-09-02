@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - VN Plate Gate{% endblock %}
+{% block content %}
+<h1>Gate status</h1>
+<div class="status-grid">
+  <div class="card">
+    <div class="muted">System</div>
+    <div id="st-system" class="big ok">…</div>
+  </div>
+  <div class="card">
+    <div class="muted">IN camera</div>
+    <div id="st-in" class="big">…</div>
+  </div>
+  <div class="card">
+    <div class="muted">OUT camera</div>
+    <div id="st-out" class="big">…</div>
+  </div>
+  <div class="card">
+    <div class="muted">Database</div>
+    <div id="st-db" class="big">…</div>
+  </div>
+  <div class="card">
+    <div class="muted">Vehicles inside</div>
+    <div id="st-inside" class="big">…</div>
+  </div>
+</div>
+<div class="card" style="margin-top:1rem">
+  <div class="muted">Last event</div>
+  <div id="st-last" style="font-size:1.1rem">…</div>
+</div>
+<script>
+async function refresh() {
+  try {
+    const r = await fetch('/api/status');
+    if (!r.ok || !r.headers.get('content-type')?.includes('json')) {
+      window.location.href = '/login';
+      return;
+    }
+    const s = await r.json();
+    const set = (id, text, cls) => {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'big ' + (cls || '');
+    };
+    set('st-system', s.system, s.system === 'ONLINE' ? 'ok' : 'bad');
+    for (const [id, side] of [['st-in', 'IN'], ['st-out', 'OUT']]) {
+      const ok = s.cameras[side];
+      set(id, ok ? 'OK' : 'FAIL', ok ? 'ok' : 'bad');
+    }
+    set('st-db', s.database ? 'OK' : 'FAIL', s.database ? 'ok' : 'bad');
+    set('st-inside', String(s.inside_count));
+    const le = s.last_event;
+    document.getElementById('st-last').innerHTML = le
+      ? `${le.plate} / ${le.direction} / ${le.reason} / ${le.ts}`
+      : 'no events yet';
+  } catch (e) { /* transient */ }
+}
+refresh();
+setInterval(refresh, 2000);
+</script>
+{% endblock %}

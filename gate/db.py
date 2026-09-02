@@ -132,6 +132,23 @@ class GateDB:
             )
             return int(cur.fetchone()["n"])
 
+    def list_vehicles(self) -> list[Any]:
+        """All vehicle rows, ordered by plate."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM vehicles ORDER BY plate"
+            ).fetchall()
+            return list(rows)
+
+    def ping(self) -> bool:
+        """Live SELECT 1 - used by the watchdog and the web dashboard."""
+        try:
+            with self._lock:
+                self._conn.execute("SELECT 1").fetchone()
+            return True
+        except sqlite3.Error:
+            return False
+
     # -- events ------------------------------------------------------------
 
     def record_event(

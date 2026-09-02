@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Vehicles - VN Plate Gate{% endblock %}
+{% block content %}
+<h1>Registered vehicles</h1>
+<form method="post" action="{{ url_for('vehicles_add') }}" style="margin:.6rem 0">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="text" name="plate" placeholder="Plate, e.g. 29A1-678.90" required>
+  <input type="text" name="note" placeholder="Note (optional)">
+  <button class="btn" type="submit">Add</button>
+</form>
+<input type="text" id="q" placeholder="Search…" oninput="filterRows(this.value)"
+       style="margin-bottom:.4rem">
+<table id="veh">
+  <tr><th>Plate</th><th>Registered</th><th>State</th><th>Note</th><th></th></tr>
+  {% for row in rows %}
+  <tr>
+    <td>{{ row["plate"] }}</td>
+    <td>
+      <form method="post" action="{{ url_for('vehicles_toggle', plate=row['plate']) }}"
+            style="display:inline">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn" type="submit">
+          {{ "ON" if row["registered"] else "OFF" }}
+        </button>
+      </form>
+    </td>
+    <td class="{{ 'badge-in' if row['inside'] else 'badge-out' }}">
+      {{ "INSIDE" if row["inside"] else "OUTSIDE" }}
+    </td>
+    <td class="muted">{{ row["note"] }}</td>
+    <td>
+      <form method="post" action="{{ url_for('vehicles_remove', plate=row['plate']) }}"
+            onsubmit="return confirm('Remove {{ row['plate'] }}?')" style="display:inline">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn" type="submit">Remove</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<script>
+function filterRows(q) {
+  q = q.toUpperCase();
+  for (const tr of document.querySelectorAll('#veh tr:nth-child(n+2)')) {
+    tr.style.display = tr.textContent.toUpperCase().includes(q) ? '' : 'none';
+  }
+}
+</script>
+{% endblock %}
