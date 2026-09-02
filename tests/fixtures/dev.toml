@@ -1,0 +1,47 @@
+# Dev/test config: tmp dirs under /tmp/gate-dev, cameras pointing at a
+# device that does not exist (degraded start must work).
+[cameras.in]
+source = "/dev/video99"
+width = 640
+height = 360
+fps = 10
+
+[cameras.out]
+source = "/dev/video99"
+width = 640
+height = 360
+fps = 10
+
+[vision]
+burst_frames = 5
+min_frames_detected = 2
+min_confidence = 0.75
+model_dir = "/home/ubuntu/doxe_quangtrung/models"
+
+[decision]
+cooldown_s = 10.0
+
+[leds]
+in_green = 17
+in_red = 27
+out_green = 22
+out_red = 23
+allow_s = 2.0
+reject_s = 2.0
+blink_s = 0.2
+
+[storage]
+db_path = "/tmp/gate-dev/gate.db"
+images_dir = "/tmp/gate-dev/images"
+retention_days = 7
+
+[web]
+host = "127.0.0.1"
+port = 8081
+secret_file = "/tmp/gate-dev/secret"
+password_file = "/tmp/gate-dev/admin.hash"
+
+[display]
+enabled = false
+width = 640
+height = 480
