@@ -47,8 +47,12 @@ class Plate:
 # Reserved NEW series pairs (TT 79/2024).
 _FORBIDDEN_SERIES = frozenset({"CD", "CT", "DA", "HC", "LB", "LD", "MK"})
 
-# OCR misread fixes, applied ONLY at digit positions.
-_FIX = {"O": "0", "I": "1", "B": "8", "D": "0", "S": "5", "Z": "2", "G": "6", "Q": "0"}
+# OCR misread fixes, applied ONLY at digit positions. The PP-OCRv3 en
+# recognizer emits lowercase glyphs (its dictionary is lowercase), so
+# lowercase l for digit 1 is routine; raw text is uppercased first, making
+# L->1 the same rule as I->1. Never applied to letter positions.
+_FIX = {"O": "0", "I": "1", "L": "1", "B": "8", "D": "0",
+        "S": "5", "Z": "2", "G": "6", "Q": "0"}
 
 _NUM5 = r"\d{3}\.?\d{2}"  # dot already stripped by _clean(); kept for spec fidelity
 
