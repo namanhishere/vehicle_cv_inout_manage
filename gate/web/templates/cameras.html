@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Cameras - VN Plate Gate{% endblock %}
+{% block content %}
+<h1>Live cameras</h1>
+<div class="seg" id="mode">
+  <button class="btn seg-on" data-mode="both" type="button">Both</button>
+  <button class="btn" data-mode="IN" type="button">IN only</button>
+  <button class="btn" data-mode="OUT" type="button">OUT only</button>
+</div>
+<div class="view-grid" id="grid">
+  <figure class="view-panel" id="panel-IN">
+    <figcaption>IN <span class="muted">(source {{ sources.IN }})</span>
+      <span id="st-in" class="muted">&#8230;</span></figcaption>
+    <img id="img-IN" alt="IN camera">
+  </figure>
+  <figure class="view-panel" id="panel-OUT">
+    <figcaption>OUT <span class="muted">(source {{ sources.OUT }})</span>
+      <span id="st-out" class="muted">&#8230;</span></figcaption>
+    <img id="img-OUT" alt="OUT camera">
+  </figure>
+</div>
+<script>
+const mode = { value: 'both' };
+const panels = {
+  IN: document.getElementById('panel-IN'),
+  OUT: document.getElementById('panel-OUT'),
+};
+const imgs = {
+  IN: document.getElementById('img-IN'),
+  OUT: document.getElementById('img-OUT'),
+};
+
+function applyMode() {
+  const single = mode.value !== 'both';
+  for (const side of ['IN', 'OUT']) {
+    const show = mode.value === 'both' || mode.value === side;
+    panels[side].classList.toggle('hidden', !show);
+    imgs[side].style.visibility = show ? '' : 'hidden';
+  }
+  document.getElementById('grid').classList.toggle('single', single);
+  for (const b of document.querySelectorAll('#mode .btn')) {
+    b.classList.toggle('seg-on', b.dataset.mode === mode.value);
+  }
+}
+
+for (const b of document.querySelectorAll('#mode .btn')) {
+  b.addEventListener('click', () => {
+    mode.value = b.dataset.mode;
+    applyMode();
+    refreshFrames();
+  });
+}
+
+function refreshFrames() {
+  const ts = Date.now();
+  for (const side of ['IN', 'OUT']) {
+    if (mode.value !== 'both' && mode.value !== side) continue;
+    imgs[side].src = '/api/camera/snapshot?side=' + side + '&t=' + ts;
+  }
+}
+
+function refreshStatus() {
+  fetch('/api/status')
+    .then(r => (r.ok ? r.json() : null))
+    .then(s => {
+      if (!s) return;
+      for (const side of ['IN', 'OUT']) {
+        const el = document.getElementById('st-' + side.toLowerCase());
+        const ok = !!s.cameras[side];
+        el.textContent = ok ? 'OK' : 'FAIL';
+        el.className = ok ? 'ok' : 'bad';
+      }
+    })
+    .catch(() => {});
+}
+
+for (const side of ['IN', 'OUT']) {
+  imgs[side].addEventListener('load', () => {
+    imgs[side].style.visibility = 'visible';
+  });
+}
+
+applyMode();
+refreshFrames();
+refreshStatus();
+setInterval(refreshFrames, 400);
+setInterval(refreshStatus, 2000);
+</script>
+{% endblock %}

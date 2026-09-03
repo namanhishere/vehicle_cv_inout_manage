@@ -46,8 +46,7 @@ hardened systemd unit (`gate.service` or `gate-display.service`).
    Dashboard shows IN/OUT camera OK when frames flow.
 3. Admin password: `sudo -u gate /opt/gate/venv/bin/python -m gate.cli passwd --config /etc/gate/config.toml`
    (or `gate_cli.py passwd`); the hash lands in `/var/lib/gate/admin.hash`.
-4. Web UI: `http://<pi-ip>:8080/`, log in, dashboard shows System ONLINE,
-   camera status, Database OK, vehicles inside, last event.
+   Cameras tab shows live IN/OUT feeds (login required; pick Both/IN/OUT).
 5. Register a plate: web UI Vehicles tab (plate canonical form, e.g.
    `29A1-678.90`) or
    `gate_cli.py add-vehicle 29A1-678.90 --note "resident"`.

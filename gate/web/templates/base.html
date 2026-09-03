@@ -25,13 +25,19 @@
     .flash-ok { background: #1c3a26; border: 1px solid #2f6b40; }
     .status-grid { display: flex; gap: 1.4rem; flex-wrap: wrap; }
     .card { border: 1px solid #2c353d; border-radius: 8px; padding: .8rem 1.1rem; background: #151b21; min-width: 160px; }
-    .big { font-size: 2.2rem; font-weight: 700; }
-    .muted { color: #8b98a3; font-size: .85rem; }
+    .seg { display: inline-flex; gap: .4rem; }
+    .seg-on { background: #2f5a7d !important; }
+    .view-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    .view-grid.single { grid-template-columns: 1fr; }
+    .view-panel { margin: 0; border: 1px solid #2c353d; border-radius: 8px; background: #000; padding: .4rem; }
+    .view-panel.hidden { display: none; }
+    .view-panel img { width: 100%; display: block; border-radius: 4px; background: #000; min-height: 140px; }
+    .view-panel figcaption { padding: .15rem .2rem .45rem; }
   </style>
 </head>
 <body>
-<nav>
-  <a href="{{ url_for('dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('cameras') }}">Cameras</a>
+  <a href="{{ url_for('vehicles') }}">Vehicles</a>
   <a href="{{ url_for('vehicles') }}">Vehicles</a>
   <a href="{{ url_for('events') }}">Events</a>
   <a href="{{ url_for('logout') }}" style="margin-left:auto">Log out</a>

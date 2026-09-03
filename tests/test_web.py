@@ -37,6 +37,11 @@ def ctx(tmp_path):
         def camera_ok(self, side):
             return side == "IN"
 
+        def frame_jpeg(self, side, max_width=640, quality=62):
+            if side == "IN":
+                return b"\xff\xd8fake-jpeg"
+            return None
+
     db = GateDB(cfg.storage.db_path)
     app = create_app(db, cfg, FakeState())
     app.config["TESTING"] = True
@@ -206,8 +211,36 @@ def test_verify_password_roundtrip():
     assert not verify_password(PASSWORD, "garbage")
 
 
-def test_logout_clears_session(ctx):
+def test_cameras_tab_requires_login(ctx):
+    assert ctx.client.get("/cameras").status_code == 302
+    assert ctx.client.get("/api/camera/snapshot?side=IN").status_code == 302
+
+
+def test_cameras_tab_renders(ctx):
     login(ctx.client)
-    r = ctx.client.get("/logout")
-    assert r.status_code == 302
-    assert ctx.client.get("/").status_code == 302
+    r = ctx.client.get("/cameras")
+    body = r.get_data(as_text=True)
+    assert r.status_code == 200
+    assert "Live cameras" in body
+    assert "IN only" in body and "OUT only" in body
+    assert "/api/camera/snapshot?side=" in body
+
+
+def test_snapshot_returns_jpeg_for_live_side(ctx):
+    login(ctx.client)
+    r = ctx.client.get("/api/camera/snapshot?side=IN")
+    assert r.status_code == 200
+    assert r.mimetype == "image/jpeg"
+    assert r.data == b"\xff\xd8fake-jpeg"
+    assert "no-store" in r.headers.get("Cache-Control", "")
+
+
+def test_snapshot_503_before_first_frame(ctx):
+    login(ctx.client)
+    assert ctx.client.get("/api/camera/snapshot?side=OUT").status_code == 503
+
+
+def test_snapshot_rejects_unknown_side(ctx):
+    login(ctx.client)
+    assert ctx.client.get("/api/camera/snapshot?side=XX").status_code == 404
+    assert ctx.client.get("/api/camera/snapshot").status_code == 404

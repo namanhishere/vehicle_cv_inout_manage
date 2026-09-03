@@ -20,6 +20,8 @@ import signal
 import threading
 import time
 
+import numpy as np
+
 from gate.capture import CameraFeed, MotionTrigger
 from gate.config import Config, load_config
 from gate.controller import SideController
@@ -47,6 +49,8 @@ class RuntimeState:
 
     def __init__(self):
         self._feeds: dict[str, CameraFeed] = {}
+        self._lock = threading.Lock()
+        self._latest: dict[str, np.ndarray] = {}
 
     def attach(self, side: str, feed: CameraFeed) -> None:
         self._feeds[side] = feed
@@ -54,6 +58,34 @@ class RuntimeState:
     def camera_ok(self, side: str) -> bool:
         feed = self._feeds.get(side)
         return feed is not None and feed.ok
+
+    def set_frame(self, side: str, frame_bgr: np.ndarray) -> None:
+        """Keep the newest frame per side (for the web live view)."""
+        with self._lock:
+            self._latest[side] = frame_bgr
+
+    def frame_jpeg(
+        self, side: str, max_width: int = 640, quality: int = 62
+    ) -> bytes | None:
+        """Encode the newest frame as JPEG; None until the first frame."""
+        import cv2
+
+        with self._lock:
+            frame = self._latest.get(side)
+        if frame is None:
+            return None
+        height, width = frame.shape[:2]
+        if width > max_width:
+            scale = max_width / width
+            frame = cv2.resize(
+                frame,
+                (max_width, max(1, int(height * scale))),
+                interpolation=cv2.INTER_AREA,
+            )
+        ok, buf = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+        )
+        return buf.tobytes() if ok else None
 
 
 class GateApp:
@@ -95,7 +127,7 @@ class GateApp:
                 min_frames_detected=config.vision.min_frames_detected,
             )
             feed = CameraFeed(side, cam.source, cam.width, cam.height,
-                              cam.fps, ctrl.on_frame)
+                              cam.fps, self._frame_sink(side, ctrl))
             ctrl.camera = feed
             self.feeds[side] = feed
             self.controllers[side] = ctrl
@@ -104,6 +136,15 @@ class GateApp:
         self.web_thread: threading.Thread | None = None
         self.display: StatusDisplay | None = None
         self.watchdog: threading.Thread | None = None
+
+    def _frame_sink(self, side: str, ctrl: SideController):
+        """Feed-thread callback: refresh the web snapshot, then the pipeline."""
+
+        def sink(frame_bgr: np.ndarray) -> None:
+            self.state.set_frame(side, frame_bgr)
+            ctrl.on_frame(frame_bgr)
+
+        return sink
 
     # -- lifecycle ---------------------------------------------------------
 
@@ -164,7 +205,7 @@ class GateApp:
         cam = self.config.cameras[side]
         ctrl = self.controllers[side]
         feed = CameraFeed(side, cam.source, cam.width, cam.height, cam.fps,
-                          ctrl.on_frame)
+                          self._frame_sink(side, ctrl))
         self.feeds[side] = feed
         self.state.attach(side, feed)
         feed.start()

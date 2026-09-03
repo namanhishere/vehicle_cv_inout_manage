@@ -19,6 +19,7 @@ import secrets
 
 from flask import (
     Flask,
+    Response,
     abort,
     flash,
     jsonify,
@@ -221,6 +222,32 @@ def create_app(db, config, state) -> Flask:
                 "inside_count": db.inside_count(),
                 "last_event": last_event,
             }
+        )
+
+    # -- cameras -----------------------------------------------------------
+
+    @app.route("/cameras")
+    @login_required
+    def cameras():
+        cam = config.cameras
+        return render_template(
+            "cameras.html",
+            sources={"IN": cam["IN"].source, "OUT": cam["OUT"].source},
+        )
+
+    @app.route("/api/camera/snapshot")
+    @login_required
+    def camera_snapshot():
+        side = request.args.get("side", "").upper()
+        if side not in ("IN", "OUT"):
+            abort(404)
+        jpeg = state.frame_jpeg(side)
+        if jpeg is None:
+            return "no frame yet", 503
+        return Response(
+            jpeg,
+            mimetype="image/jpeg",
+            headers={"Cache-Control": "no-store"},
         )
 
     # -- vehicles ----------------------------------------------------------
