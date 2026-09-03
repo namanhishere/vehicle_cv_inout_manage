@@ -22,8 +22,9 @@ apt-get update -qq
 apt-get install -y -qq libgpiod2 python3-venv ffmpeg 2>/dev/null || \
   apt-get install -y -qq libgpiod2 python3-venv
 
-echo "==> creating gate user (system, no shell)"
-id gate >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin gate
+echo "==> access groups (video, gpio) for gate.service"
+getent group gpio >/dev/null || groupadd --system gpio
+getent group video >/dev/null || groupadd --system video
 
 echo "==> directories"
 mkdir -p /opt/gate /var/lib/gate/images /etc/gate
