@@ -29,7 +29,7 @@ echo "==> directories"
 mkdir -p /opt/gate /var/lib/gate/images /etc/gate
 
 echo "==> copying repository to /opt/gate"
-rsync -a --delete \
+  --exclude '.venv*' --exclude 'venv' --exclude 'models/vendor' --exclude 'data' \
   --exclude '.venv*' --exclude 'models/vendor' --exclude 'data' \
   --exclude 'runs' --exclude '.git' --exclude '__pycache__' \
   ./ /opt/gate/ 2>/dev/null || {
