@@ -51,15 +51,6 @@ if [ ! -f /var/lib/gate/secret ]; then
   chmod 600 /var/lib/gate/secret
 fi
 
-echo "==> initial admin password (printed once)"
-if [ ! -f /var/lib/gate/admin.hash ]; then
-  PASSWORD="$(head -c 9 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 12)"
-  cd /opt/gate
-  printf '%s\n%s\n' "$PASSWORD" "$PASSWORD" | \
-    ./venv/bin/python -m gate.cli passwd --config /etc/gate/config.toml >/dev/null
-  echo "ADMIN PASSWORD: $PASSWORD  (change with: gate_cli.py passwd)"
-fi
-
 echo "==> config template"
 if [ ! -f /etc/gate/config.toml ]; then
   echo "camera IN source (V4L2 index or RTSP URL) [0]:"
@@ -117,6 +108,15 @@ height = 480
 EOF
   chmod 640 /etc/gate/config.toml
   chown root:gate /etc/gate/config.toml
+fi
+
+echo "==> initial admin password (printed once)"
+if [ ! -f /var/lib/gate/admin.hash ]; then
+  PASSWORD="$(head -c 9 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 12)"
+  cd /opt/gate
+  printf '%s\n%s\n' "$PASSWORD" "$PASSWORD" | \
+    ./venv/bin/python -m gate.cli passwd --config /etc/gate/config.toml >/dev/null
+  echo "ADMIN PASSWORD: $PASSWORD  (change with: gate_cli.py passwd)"
 fi
 
 echo "==> ownership"
